@@ -188,5 +188,3 @@ def calculate_entropy(data):
     counts = pd_series.value_counts()
     entropy = sps.entropy(counts, base=2)
     return entropy
-
-
