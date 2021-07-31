@@ -26,43 +26,70 @@ ST.get_top_k_shapelets(X_train=X_train, y_train=y_train, n_shapelets=1,
 shapelet_min_size=30, shapelet_max_size=40)
 dump_object('01_top_shapelet_GunPoint_ST', ST)
 
+# %%
+'''
+visualize mindist of top 5 shapelets for GSS and ST for both training and test data
+goal: demonstrate, that GSS finds complementary shapelets
+'''
+
+from pyts.datasets import load_gunpoint
+X_train, X_test, y_train, y_test = load_gunpoint(return_X_y=True)
+
+GSS= GreedyShapeletSearch()
+GSS.get_top_k_shapelets(X_train=X_train, y_train=y_train, scoring_function=fit_svm, 
+n_shapelets=5, shapelet_min_size=30, shapelet_max_size=40)
+dump_object('01_top5_shapelet_GunPoint_GSS', GSS)
+
+ST = ShapeletTransform()
+ST.get_top_k_shapelets(X_train=X_train, y_train=y_train, n_shapelets=5, 
+shapelet_min_size=30, shapelet_max_size=40)
+dump_object('01_top5_shapelet_GunPoint_ST', ST)
 
 # %%
+'''
+Repeat the benchmark in from Hills et al. for GSS
+'''
 
-GSS = load_object('01_top_shapelet_GunPoint_GSS') 
-ST_1 = load_object('01_top_shapelet_GunPoint_ST') 
+from pyts.datasets import load_gunpoint
+X_train, X_test, y_train, y_test = load_gunpoint(return_X_y=True)
 
-# %% plot
+GSS= GreedyShapeletSearch()
+GSS.get_top_k_shapelets(X_train=X_train, y_train=y_train, scoring_function=fit_svm, 
+n_shapelets=75, shapelet_min_size=25, shapelet_max_size=45)
+dump_object('01_top75_shapelet_GunPoint_GSS', GSS)
 
-GSS_1.features
+
+
+# %%
+'''
+Repeat the benchmark in from Hills et al. for GSS
+'''
+
+GSS = GreedyShapeletSearch()
+GSS.get_top_k_shapelets(X_train=X_train, y_train=y_train, 
+scoring_function=fit_svm, n_shapelets=1, shapelet_min_size=30, shapelet_max_size=40)
+
+# Evaluation Pipeline
+# Initialize SVM
+clf = SVC(kernel='linear',class_weight='balanced')
+# Evaluate the X_test
+score = fit_classifier(GSS, X_train, y_train, X_test, y_test, clf, f1_score)
 
 
 
 # %% plot
 
 import matplotlib.pyplot as plt
-#plt.style.use('classic')
-#%matplotlib inline
 import numpy as np
 import seaborn as sns
-#sns.set()
 
 # %%
 
 sns.distplot(features_transform(X_train[y_train == 1], GSS))
 sns.distplot(features_transform(X_train[y_train == 2], GSS))
 
-plt.xlabel("Minimum distance")
-plt.title("Feature distribution of the top shapelet for the GSS")
-#plt.legend(["class 1",'class 2'])
-
-# %%
-
-sns.distplot(features_transform(X_test[y_test == 1], ST))
-sns.distplot(features_transform(X_test[y_test == 2], ST), bins = 14)
-
-plt.xlabel("Minimum distance")
-plt.title("Feature distribution of the top shapelet for the GSS")
+#plt.xlabel("Minimum distance")
+#plt.title("Feature distribution of the top shapelet for the GSS")
 #plt.legend(["class 1",'class 2'])
 
 # %%
