@@ -10,6 +10,7 @@ class ShapeletTransform():
         self.exclusion_zone = {}
         self.shapelet_size = 0
         self.top_shapelets = []
+        self.raw_samples = []
 
     @staticmethod
     def rolling_window(a, window):
@@ -48,6 +49,9 @@ class ShapeletTransform():
             self.retrieve_top_shapelet(X_train)
         
         self.top_shapelets.sort(key=lambda x: (x[2],x[3]), reverse=True)
+
+        for sample_idx, _, _, _, _, _ in self.top_shapelets:
+            self.raw_samples.append(X_train[sample_idx])
         
 
     def main_event_loop(self, X_train, y_train, shapelet_size = 10):
