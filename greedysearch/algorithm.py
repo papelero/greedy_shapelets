@@ -17,6 +17,8 @@ class GreedyShapeletSearch():
         self.features = []
         # Containes the final output. Format: (sample_idx, candidate_idx, score, margin, shapelet_size, shapelet)
         self.top_shapelets = []
+        # Raw shapelets
+        self.raw_shapelets = []
 
     @staticmethod
     def rolling_window(a, window):
@@ -50,6 +52,10 @@ class GreedyShapeletSearch():
             self.main_event_loop(X_train, y_train, scoring_function, shapelet_min_size = shapelet_min_size, shapelet_max_size = shapelet_max_size)
             print(f"Found shapelet {i} at sample: {self.top_shapelets[i][0]}, candidate: {self.top_shapelets[i][1]}.")
             print("Time taken: ", time.time()-start)
+
+        for sample_idx, _, _, _, _, _ in self.top_shapelets:
+            self.raw_shapelets.append(X_train[sample_idx])
+
 
 
     def main_event_loop(self, X_train, y_train, scoring_function, shapelet_min_size = 30, shapelet_max_size = 31):
