@@ -33,6 +33,7 @@ goal: demonstrate, that GSS finds complementary shapelets
 '''
 
 from pyts.datasets import load_gunpoint
+
 X_train, X_test, y_train, y_test = load_gunpoint(return_X_y=True)
 
 GSS= GreedyShapeletSearch()
@@ -117,3 +118,15 @@ sns.scatterplot(x=np.arange(len(b)),y=b, color = 'r', alpha = 0.5)
 sns.scatterplot(x=np.arange(len(a),len(a)+len(c)),y=c, color = 'b')
 sns.scatterplot(x=np.arange(len(b),len(b)+len(d)),y=d, color = 'r')
 # %%
+
+
+
+
+
+if __name__ == "__main__":
+    X_train, X_test, y_train, y_test = load_gunpoint(return_X_y=True)
+
+    GSS= GreedyShapeletSearch()
+    GSS.get_top_k_shapelets(X_train=X_train, y_train=y_train, scoring_function=fit_svm, 
+    n_shapelets=75, shapelet_min_size=25, shapelet_max_size=45)
+    dump_object('01_top75_shapelet_GunPoint_GSS', GSS)
