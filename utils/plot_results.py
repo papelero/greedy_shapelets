@@ -20,6 +20,7 @@ def create_dataframe(features, labels, dataset, method):
 def plot_swarmplot(df, filename):
     fig = sns.swarmplot(x="Dataset", y="Feature 0", hue="Class label", data=df)
     plt.savefig(f'results/{filename}')
+    plt.close()
 
 def plot_top_shapelets(GSS, y_train, filename):
 
