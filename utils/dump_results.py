@@ -9,3 +9,8 @@ def dump_object(file_name, obj):
 def load_object(file_name):
     file = open(os.path.join('results',file_name), 'rb') 
     return pickle.load(file)
+
+def dump_list(list, filename):
+    with open(f'results/{filename}.txt', 'w') as f:
+        for item in list:
+            f.write("%s\n" % str(item))
