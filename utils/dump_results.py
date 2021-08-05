@@ -11,6 +11,6 @@ def load_object(file_name):
     return pickle.load(file)
 
 def dump_list(list, filename):
-    with open(f'results/{filename}.txt', 'w') as f:
+    with open(f'results/{filename}.txt', 'a') as f:
         for item in list:
             f.write("%s\n" % str(item))
