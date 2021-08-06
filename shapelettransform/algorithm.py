@@ -154,7 +154,6 @@ class ShapeletTransformVL():
     
     def get_candidate_mins(self, sample_data, shapelet_size = 30):
         
-        start = time.time()
 
         # Storing indices to only retrieve minima across specific samples
         sample_indices = []
@@ -165,6 +164,23 @@ class ShapeletTransformVL():
 
         # Flattening the data for later use in mpx
         data_flat = np.concatenate(sample_data)
+
+        # Calculating profile
+        start = time.time()
+        profiles = []
+        for sample in sample_data:
+
+            sample_minima = np.stack([mpx(sample, shapelet_size, data_sample, n_jobs=1)['mp'] for data_sample in sample_data]).T
+            profiles.append(sample_minima)
+
+        print("Time taken: ", time.time()-start)
+        return profiles 
+        
+            # print(sample_minima.shape)
+            # return
+            # print("!!!!!!!!!", candidate_profile['mp'].shape)
+            # return
+
 
         # windowed_data
         windowed_data = self.rolling_window(data_flat, shapelet_size)
@@ -178,6 +194,8 @@ class ShapeletTransformVL():
                 candidate_minima = [min(candidate_profile['mp'][st:ed]) for st, ed in sample_indices]
                 sample_minima.append(candidate_minima)
             
+            print(np.stack(sample_minima).shape)
+            return
             profiles.append(np.stack(sample_minima))
         print("Time taken: ", time.time()-start)
         return profiles

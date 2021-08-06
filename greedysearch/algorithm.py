@@ -8,6 +8,8 @@ import pandas as pd
 import scipy.stats as sps
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
+from matrixprofile.algorithms import mpx
+
 
 class GreedyShapeletSearch():
     def __init__(self):
@@ -211,6 +213,27 @@ class GreedyShapeletSearchVL():
         shape = a.shape[:-1] + (a.shape[-1] - window + 1, window)
         strides = a.strides + (a.strides[-1],)
         return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
+    
+    def get_candidate_mins(self, sample_data, shapelet_size = 30):
+        
+
+        # Storing indices to only retrieve minima across specific samples
+        sample_indices = []
+        idx = 0
+        for sample in sample_data:
+            sample_indices.append((idx,idx+len(sample)-shapelet_size))
+            idx += len(sample)
+            
+        # Calculating profile
+        start = time.time()
+        profiles = []
+        for sample in sample_data:
+
+            sample_minima = np.stack([mpx(sample, shapelet_size, data_sample, n_jobs=1)['mp'] for data_sample in sample_data]).T
+            profiles.append(sample_minima)
+
+        print("Time taken: ", time.time()-start)
+        return profiles 
     
     def get_candidate_mins(self, sample_data, shapelet_size = 10):
         """

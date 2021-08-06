@@ -7,7 +7,7 @@ from shapelettransform.pipeline import fit_classifier_vl
 from utils.dump_results import load_object
 
 import numpy as np
-
+import time
 if __name__ == "__main__":
     # Load data
     
@@ -30,13 +30,23 @@ if __name__ == "__main__":
     # Initialize Shapelet transform object. NOTE: VL stands for variable length (list of variable length samples possible). THIS TAKES MUCH LONGER 
     ST = ShapeletTransformVL()
     # Retrieve a specified number of shapelets.
-    # ST.get_top_k_shapelets(X_train=X_train, y_train=np.array(y_train), n_shapelets=2, shapelet_min_size=30, shapelet_max_size=31)
-    ST.get_top_k_shapelets(X_train=X_train[:10], y_train=np.array([0,0,0,1,1,0,0,0,1,1]), n_shapelets=2, shapelet_min_size=30, shapelet_max_size=31)
+    ST.get_top_k_shapelets(X_train=X_train, y_train=np.array(y_train), n_shapelets=2, shapelet_min_size=30, shapelet_max_size=31)
+    # ST.get_top_k_shapelets(X_train=X_train[:10], y_train=np.array([0,0,0,1,1,0,0,0,1,1]), n_shapelets=2, shapelet_min_size=30, shapelet_max_size=31)
 
     # for sample in X_train:
     #     print(sample.shape)
-    # ST.get_candidate_mins(X_train, shapelet_size=30)
-    # print(y_train)
+
+    # start = time.time()
+    # profiles1 = ST.get_candidate_mins(X_train, shapelet_size=30)
+    # print("MPX time taken: ", time.time()-start)
+    # print(profiles1[0].shape)
+    
+    # start = time.time()
+    # profiles2= ST.get_candidate_mins_dprec(X_train[:10], shapelet_size=30)
+    # print("DPRC time taken: ", time.time()-start)
+    # print(profiles2[0].shape)
+    # print(profiles1[0]==profiles2[0])
+    # # print(y_train)
     # Evaluation Pipeline
     # Initialize SVM
     clf = SVC(kernel='linear',class_weight='balanced')
