@@ -162,14 +162,10 @@ class ShapeletTransformVL():
             sample_indices.append((idx,idx+len(sample)-shapelet_size))
             idx += len(sample)
 
-        # Flattening the data for later use in mpx
-        data_flat = np.concatenate(sample_data)
-
         # Calculating profile
         start = time.time()
         profiles = []
         for sample in sample_data:
-
             sample_minima = np.stack([mpx(sample, shapelet_size, data_sample, n_jobs=1)['mp'] for data_sample in sample_data]).T
             profiles.append(sample_minima)
 

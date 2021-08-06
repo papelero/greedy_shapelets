@@ -197,6 +197,7 @@ def calculate_entropy(data):
     entropy = sps.entropy(counts, base=2)
     return entropy
 
+
 class GreedyShapeletSearchVL():
     def __init__(self):
         self.shapelets = []
@@ -223,7 +224,7 @@ class GreedyShapeletSearchVL():
         for sample in sample_data:
             sample_indices.append((idx,idx+len(sample)-shapelet_size))
             idx += len(sample)
-            
+
         # Calculating profile
         start = time.time()
         profiles = []
@@ -235,31 +236,31 @@ class GreedyShapeletSearchVL():
         print("Time taken: ", time.time()-start)
         return profiles 
     
-    def get_candidate_mins(self, sample_data, shapelet_size = 10):
-        """
-        Function that calculates the distance of all candidates of a given data set to all all other candidates.
-        CAREFUL:
-        - memory blows up quickly.
-        - contains the zeros (distance of candidates to itself)
-        """
+    # def get_candidate_mins(self, sample_data, shapelet_size = 10):
+    #     """
+    #     Function that calculates the distance of all candidates of a given data set to all all other candidates.
+    #     CAREFUL:
+    #     - memory blows up quickly.
+    #     - contains the zeros (distance of candidates to itself)
+    #     """
 
-        sample_lengths = [len(sample) for sample in sample_data]
-        samples_padded = np.stack([np.pad(sample, (0,max(sample_lengths)-len(sample)), 'constant') for sample in sample_data])
-        # Window the array
-        windowed_data = self.rolling_window(samples_padded, shapelet_size)
-        # Standardize candidates
-        windowed_data = self.standardize_samples_candidates(windowed_data)
-        distances = []
-        start = time.time()
-        for sample_length, sample_candidates in zip(sample_lengths, windowed_data):
-            # print(sample_candidates.shape)
-            # return
-            candidate_distances = np.stack([((windowed_data - candidate)**2).sum(axis=-1) for candidate in sample_candidates[:sample_length-shapelet_size]], axis=1)
-            # candidate_distances = np.array([((windowed_data - candidate)**2).sum(axis=-1).min(axis=-1) for candidate in sample_candidates[:sample_length-shapelet_size]])
-            candidate_distances_mins = np.stack([distance[:,:length-shapelet_size].min(axis=-1) for length, distance in zip(sample_lengths, candidate_distances)])
-            distances.append(candidate_distances_mins.T)
-        print("Time taken for candidate mins: ", time.time()-start)
-        return distances
+    #     sample_lengths = [len(sample) for sample in sample_data]
+    #     samples_padded = np.stack([np.pad(sample, (0,max(sample_lengths)-len(sample)), 'constant') for sample in sample_data])
+    #     # Window the array
+    #     windowed_data = self.rolling_window(samples_padded, shapelet_size)
+    #     # Standardize candidates
+    #     windowed_data = self.standardize_samples_candidates(windowed_data)
+    #     distances = []
+    #     start = time.time()
+    #     for sample_length, sample_candidates in zip(sample_lengths, windowed_data):
+    #         # print(sample_candidates.shape)
+    #         # return
+    #         candidate_distances = np.stack([((windowed_data - candidate)**2).sum(axis=-1) for candidate in sample_candidates[:sample_length-shapelet_size]], axis=1)
+    #         # candidate_distances = np.array([((windowed_data - candidate)**2).sum(axis=-1).min(axis=-1) for candidate in sample_candidates[:sample_length-shapelet_size]])
+    #         candidate_distances_mins = np.stack([distance[:,:length-shapelet_size].min(axis=-1) for length, distance in zip(sample_lengths, candidate_distances)])
+    #         distances.append(candidate_distances_mins.T)
+    #     print("Time taken for candidate mins: ", time.time()-start)
+    #     return distances
     
     def get_top_k_shapelets(self, X_train, y_train, scoring_function, n_shapelets=1, shapelet_min_size = 10, shapelet_max_size=20):
 
@@ -296,7 +297,7 @@ class GreedyShapeletSearchVL():
         Extracts a (greedy) optimal shapelet.
         """
         # Iterate through all samples in profiles
-        for sample_idx in range(profiles.shape[0]):
+        for sample_idx in range(len(profiles)):
             # The minimum distances of the given samples candidates to all other samples - shape: n_samples, n_candidates
             sample = profiles[sample_idx]
             # Iterate through all candidate distances of the given sample
@@ -306,7 +307,12 @@ class GreedyShapeletSearchVL():
                 # Add features if other shapelets have been extracted
                 features = self.get_features(candidate)
                 # Score candidate
-                score, margin = scoring_function(features, y_train)
+                try:
+                    score, margin = scoring_function(features, y_train)
+                except Exception as e:
+                    print(f"couldnt compute score and margin for sample {sample_idx} candidate {candidate_idx}")
+                    score = 0
+                    margin = 0
                 self.shapelets.append((sample_idx, candidate_idx, score, margin, shapelet_size, candidate))
 
     def get_features(self,candidate):
@@ -331,14 +337,13 @@ class GreedyShapeletSearchVL():
                 self.exclusion_zone[sample_idx] = []
             else:
                 # Otherwise check if candidate index is in exclusion zone of sample
-                if candidate_idx in self.exclusion_zone[sample_idx]:
                     continue
             # Extend exclusion zone
             self.exclusion_zone[sample_idx].extend(list(range(candidate_idx - shapelet_size, candidate_idx+shapelet_size)))
             # Add profile features to features
             self.features.append(candidate)
             # Add shapelet to top shapelets
-            self.top_shapelets.append((sample_idx, candidate_idx, score, margin, shapelet_size, X_train[sample_idx,candidate_idx:candidate_idx+shapelet_size]))
+            self.top_shapelets.append((sample_idx, candidate_idx, score, margin, shapelet_size, X_train[sample_idx][candidate_idx:candidate_idx+shapelet_size]))
             # Signal shapelet found
             top_shapelet_found = True
 
@@ -384,9 +389,10 @@ def fit_svm(X,Y, target_class=1):
     if len(X.shape) == 1:
        X = X.reshape(-1, 1) 
     # Normalize the input data
-    X_norm = (X-X.mean(axis=0))/X.std(axis=0)
     # Fit SVM
+    X_norm = (X-X.mean(axis=0))/X.std(axis=0)
     clf.fit(X_norm, Y)
+    
     # Calculate margin
     margin = 1 / np.sqrt(np.sum(clf.coef_ ** 2))
     # Predict
@@ -401,7 +407,6 @@ def fit_svm(X,Y, target_class=1):
         partial_data = Y[Y_pred == label]
         # Add the weighted entropy to the entropy after
         entropy_after += len(partial_data)/len(Y_pred) * calculate_entropy(partial_data)
-
     return entropy_before-entropy_after, margin
 
 def calculate_entropy(data):
