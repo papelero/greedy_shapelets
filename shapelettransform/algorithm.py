@@ -172,54 +172,6 @@ class ShapeletTransformVL():
         print("Time taken: ", time.time()-start)
         return profiles 
         
-            # print(sample_minima.shape)
-            # return
-            # print("!!!!!!!!!", candidate_profile['mp'].shape)
-            # return
-
-
-        # windowed_data
-        windowed_data = self.rolling_window(data_flat, shapelet_size)
-        
-        # Calculating the profiles 
-        profiles = []
-        for sample_range in sample_indices:
-            sample_minima = []
-            for candidate_idx in range(sample_range[0],sample_range[1]):
-                candidate_profile = mpx(data_flat, shapelet_size, windowed_data[candidate_idx], n_jobs=1)
-                candidate_minima = [min(candidate_profile['mp'][st:ed]) for st, ed in sample_indices]
-                sample_minima.append(candidate_minima)
-            
-            print(np.stack(sample_minima).shape)
-            return
-            profiles.append(np.stack(sample_minima))
-        print("Time taken: ", time.time()-start)
-        return profiles
-
-
-    def get_candidate_mins_dprec(self, sample_data, shapelet_size = 10):
-        """
-        Function that calculates the distance of all candidates of a given data set to all all other candidates.
-        CAREFUL:
-        - memory blows up quickly.
-        - contains the zeros (distance of candidates to itself)
-        """
-
-        sample_lengths = [len(sample) for sample in sample_data]
-        samples_padded = np.stack([np.pad(sample, (0,max(sample_lengths)-len(sample)), 'constant') for sample in sample_data])
-        # Window the array
-        windowed_data = self.rolling_window(samples_padded, shapelet_size)
-        # Standardize candidates
-        windowed_data = self.standardize_samples_candidates(windowed_data)
-        distances = []
-        start = time.time()
-        for sample_length, sample_candidates in zip(sample_lengths, windowed_data):
-            candidate_distances = np.stack([((windowed_data - candidate)**2).sum(axis=-1) for candidate in sample_candidates[:sample_length-shapelet_size]], axis=1)
-            # candidate_distances = np.array([((windowed_data - candidate)**2).sum(axis=-1).min(axis=-1) for candidate in sample_candidates[:sample_length-shapelet_size]])
-            candidate_distances_mins = np.stack([distance[:,:length-shapelet_size].min(axis=-1) for length, distance in zip(sample_lengths, candidate_distances)])
-            distances.append(candidate_distances_mins.T)
-        print("Time taken for candidate mins: ", time.time()-start)
-        return distances
 
     def get_top_k_shapelets(self, X_train, y_train, n_shapelets=1, shapelet_min_size = 10, shapelet_max_size=20):
 
@@ -237,6 +189,10 @@ class ShapeletTransformVL():
 
         for sample_idx, _, _, _, _, _ in self.top_shapelets:
             self.raw_samples.append(X_train[sample_idx])
+
+        self.shapelets = []
+        self.exclusion_zone = []
+
         
 
     def main_event_loop(self, X_train, y_train, shapelet_size = 10):

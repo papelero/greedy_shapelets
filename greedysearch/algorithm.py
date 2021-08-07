@@ -236,32 +236,7 @@ class GreedyShapeletSearchVL():
         print("Time taken: ", time.time()-start)
         return profiles 
     
-    # def get_candidate_mins(self, sample_data, shapelet_size = 10):
-    #     """
-    #     Function that calculates the distance of all candidates of a given data set to all all other candidates.
-    #     CAREFUL:
-    #     - memory blows up quickly.
-    #     - contains the zeros (distance of candidates to itself)
-    #     """
-
-    #     sample_lengths = [len(sample) for sample in sample_data]
-    #     samples_padded = np.stack([np.pad(sample, (0,max(sample_lengths)-len(sample)), 'constant') for sample in sample_data])
-    #     # Window the array
-    #     windowed_data = self.rolling_window(samples_padded, shapelet_size)
-    #     # Standardize candidates
-    #     windowed_data = self.standardize_samples_candidates(windowed_data)
-    #     distances = []
-    #     start = time.time()
-    #     for sample_length, sample_candidates in zip(sample_lengths, windowed_data):
-    #         # print(sample_candidates.shape)
-    #         # return
-    #         candidate_distances = np.stack([((windowed_data - candidate)**2).sum(axis=-1) for candidate in sample_candidates[:sample_length-shapelet_size]], axis=1)
-    #         # candidate_distances = np.array([((windowed_data - candidate)**2).sum(axis=-1).min(axis=-1) for candidate in sample_candidates[:sample_length-shapelet_size]])
-    #         candidate_distances_mins = np.stack([distance[:,:length-shapelet_size].min(axis=-1) for length, distance in zip(sample_lengths, candidate_distances)])
-    #         distances.append(candidate_distances_mins.T)
-    #     print("Time taken for candidate mins: ", time.time()-start)
-    #     return distances
-    
+   
     def get_top_k_shapelets(self, X_train, y_train, scoring_function, n_shapelets=1, shapelet_min_size = 10, shapelet_max_size=20):
 
         for i in range(n_shapelets):
@@ -274,6 +249,9 @@ class GreedyShapeletSearchVL():
 
         for sample_idx, _, _, _, _, _ in self.top_shapelets:
             self.raw_samples.append(X_train[sample_idx])
+
+        self.shapelets = []
+        self.features = []
 
 
 
