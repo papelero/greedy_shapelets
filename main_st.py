@@ -1,5 +1,6 @@
 from pyts.datasets import load_gunpoint
 from sklearn.svm import SVC
+
 from sklearn.metrics import f1_score
 
 from shapelettransform.algorithm import ShapeletTransform, ShapeletTransformVL
