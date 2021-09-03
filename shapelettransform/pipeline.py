@@ -83,3 +83,15 @@ def fit_classifier_vl(GSS, X_train, y_train, X_test, y_test, classifier, scoring
     y_pred = classifier.predict(features_test_norm)
     return scoring_function(y_test, y_pred)
 
+def train_predict(GSS, X_train, y_train, X_test, classifier):
+    """
+    Trains a classifier on train set and applied on test set
+    """
+    # Apply the feature pipeline to the training set and testing set to get the min distances of each shapelet
+    features_train = features_transform_vl(X_train, GSS)
+    features_test = features_transform_vl(X_test, GSS)
+
+    # Normalizing min distances
+    features_train_norm, features_test_norm = feature_normalization(features_train, features_test)
+    classifier.fit(features_train_norm, y_train)
+    return classifier.predict(features_test_norm)
