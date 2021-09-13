@@ -1,15 +1,5 @@
 # greedy-shapelet-search
 
-
-
-
-
-# 26.07
-
-To use the greedy shapelet search algorithm, refer to the modlues in the folder greedysearch and the main_greedy.py.
-The rest should be self-explanatory. 
-
-# 29.07
-
-To use the standard shapelet transform algorithm, refer to the modlues in the folder shapelettransform and the main_st.py.
-The rest should be self-explanatory. 
+There are two main files:
+1. main_greedy: conatins a working example of the greedy algorithm
+2. main_st: conatins a working example of the normal shapelet algorithm
