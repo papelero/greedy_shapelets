@@ -6,6 +6,7 @@ import time
 import numpy as np
 import pandas as pd
 import scipy.stats as sps
+
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from matrixprofile.algorithms import mpx
@@ -58,6 +59,8 @@ class GreedyShapeletSearch():
         for sample_idx, _, _, _, _, _ in self.top_shapelets:
             self.raw_samples.append(X_train[sample_idx])
 
+        self.shapelets = []
+        self.features = []
 
 
     def main_event_loop(self, X_train, y_train, scoring_function, shapelet_min_size = 30, shapelet_max_size = 31):
@@ -157,46 +160,6 @@ class GreedyShapeletSearch():
         Standardized each shapelet candidate (after windowing).
         """
         return (samples-np.expand_dims(samples.mean(axis=axis),axis))/np.expand_dims(samples.std(axis=axis),axis)
-
-def fit_svm(X,Y, target_class=1):
-    """
-    Fitting a SVM and returning the f1 score and the calculated margin.
-    """
-    # Initialize the classifier
-    clf = SVC(kernel='linear', class_weight='balanced')
-    # Adjust the dimensions of X if necessary
-    if len(X.shape) == 1:
-       X = X.reshape(-1, 1) 
-    # Normalize the input data
-    X_norm = (X-X.mean(axis=0))/X.std(axis=0)
-    # Fit SVM
-    clf.fit(X_norm, Y)
-    # Calculate margin
-    margin = 1 / np.sqrt(np.sum(clf.coef_ ** 2))
-    # Predict
-    Y_pred = clf.predict(X_norm)
-    # Calculate info gain
-    entropy_before = calculate_entropy(Y)
-    # Start with a 'pure' entropy 
-    entropy_after = 0
-    # Iterating through classes
-    for label in set(Y):
-        # Retrieve the true labels of all instances classified as 'label'
-        partial_data = Y[Y_pred == label]
-        # Add the weighted entropy to the entropy after
-        entropy_after += len(partial_data)/len(Y_pred) * calculate_entropy(partial_data)
-
-    return entropy_before-entropy_after, margin
-
-def calculate_entropy(data):
-    """
-    Helper function to calculate the entropy of a data set.
-    """
-    pd_series = pd.Series(data)
-    counts = pd_series.value_counts()
-    entropy = sps.entropy(counts, base=2)
-    return entropy
-
 
 class GreedyShapeletSearchVL():
     def __init__(self):

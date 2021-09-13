@@ -9,8 +9,7 @@ from utils.dump_results import load_object
 import numpy as np
 if __name__ == "__main__":
     # Load data
-    # X_train, X_test, y_train, y_test = load_gunpoint(return_X_y=True)
-
+    X_train, X_test, y_train, y_test = load_gunpoint(return_X_y=True)
 
     X_norm = load_object('normal')
     y_norm = [0]*len(X_norm)
